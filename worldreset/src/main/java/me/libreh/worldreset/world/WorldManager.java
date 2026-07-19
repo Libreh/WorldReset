@@ -6,6 +6,7 @@ import me.libreh.worldreset.api.WorldDeletion;
 import me.libreh.worldreset.api.WorldPool;
 import me.libreh.worldreset.api.WorldPoolHost;
 import me.libreh.worldreset.api.WorldPreloader;
+import me.libreh.worldreset.config.Config;
 import me.libreh.worldreset.config.ConfigManager;
 import me.libreh.worldreset.util.SeedUtil;
 import net.casual.arcade.dimensions.ArcadeDimensions;
@@ -58,10 +59,10 @@ public class WorldManager implements WorldPoolHost {
     public WorldManager(MinecraftServer server, LobbyWorld lobbyWorld) {
         this.server = server;
         this.taskExecutor = new me.libreh.worldreset.api.ServerTaskExecutor(server);
-        this.triggers = new TriggerTracker(server);
+        this.triggers = new TriggerTracker(server, ConfigManager::config);
         this.playerManager = new PlayerManager(server, this.taskExecutor);
         this.playerResetState = PlayerResetState.load(server);
-        this.countdownManager = new CountdownManager(server, this.triggers);
+        this.countdownManager = new CountdownManager(server, this.triggers, ConfigManager::config);
         this.worldPreloader = new WorldPreloader(server);
         this.poolPreloader = new WorldPreloader(server);
         this.resetManager = new ResetManager(
@@ -96,8 +97,9 @@ public class WorldManager implements WorldPoolHost {
             if (end != null) WorldDeletion.deleteDimensionAsync(server, end);
         }
 
-        resetManager.createGameWorlds(SeedUtil.parseSeed(ConfigManager.config().seed));
-        resetManager.initializeWorldSpawn();
+        Config cfg = ConfigManager.config();
+        resetManager.createGameWorlds(SeedUtil.parseSeed(cfg.seed));
+        resetManager.initializeWorldSpawn(cfg);
     }
 
     private void cleanupOrphanedPoolWorlds(MinecraftServer server) {
@@ -184,7 +186,7 @@ public class WorldManager implements WorldPoolHost {
         queuedResetSeed = "";
         state = WorldState.RESETTING;
         try {
-            resetManager.resetWorlds(seed);
+            resetManager.resetWorlds(ConfigManager.config(), seed);
         } catch (Throwable e) {
             WorldReset.LOGGER.error("Error during world reset", e);
         } finally {
