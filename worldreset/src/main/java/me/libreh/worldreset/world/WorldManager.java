@@ -2,6 +2,7 @@ package me.libreh.worldreset.world;
 
 import me.libreh.worldreset.WorldReset;
 import me.libreh.worldreset.api.LobbyWorld;
+import me.libreh.worldreset.api.WorldDeletion;
 import me.libreh.worldreset.api.WorldPool;
 import me.libreh.worldreset.api.WorldPoolHost;
 import me.libreh.worldreset.api.WorldPreloader;
@@ -42,6 +43,10 @@ public class WorldManager implements WorldPoolHost {
     private CustomLevel gameEnd;
 
     private final WorldPreloader worldPreloader;
+    // Dedicated instance so the pool's background refill never races with this preloader's own
+    // on-demand spawn-area preload; sharing one meant every reset cancelled whatever background
+    // preload the pool had in flight, regardless of relevance.
+    private final WorldPreloader poolPreloader;
     private @Nullable WorldPool worldPool;
 
     private boolean resetQueued;
@@ -58,6 +63,7 @@ public class WorldManager implements WorldPoolHost {
         this.playerResetState = PlayerResetState.load(server);
         this.countdownManager = new CountdownManager(server, this.triggers);
         this.worldPreloader = new WorldPreloader(server);
+        this.poolPreloader = new WorldPreloader(server);
         this.resetManager = new ResetManager(
             server, this, playerManager, playerResetState, triggers
         );
@@ -67,7 +73,7 @@ public class WorldManager implements WorldPoolHost {
         this.activeWorldSnapshot = WorldSnapshot.fromConfig(ConfigManager.config());
 
         if (ConfigManager.config().poolSize > 0) {
-            this.worldPool = new WorldPool(server, this, taskExecutor, worldPreloader, WorldReset.MOD_ID);
+            this.worldPool = new WorldPool(server, this, taskExecutor, poolPreloader, WorldReset.MOD_ID);
             WorldReset.LOGGER.info("World pool enabled (pool_size={})", ConfigManager.config().poolSize);
         }
     }
@@ -85,12 +91,13 @@ public class WorldManager implements WorldPoolHost {
             }
             WorldReset.LOGGER.warn("Saved active worlds state missing or invalid, creating fresh game worlds");
             ActiveWorldsState.clear(server);
-            if (overworld != null) ArcadeDimensions.delete(server, overworld);
-            if (nether != null) ArcadeDimensions.delete(server, nether);
-            if (end != null) ArcadeDimensions.delete(server, end);
+            if (overworld != null) WorldDeletion.deleteDimensionAsync(server, overworld);
+            if (nether != null) WorldDeletion.deleteDimensionAsync(server, nether);
+            if (end != null) WorldDeletion.deleteDimensionAsync(server, end);
         }
 
         resetManager.createGameWorlds(SeedUtil.parseSeed(ConfigManager.config().seed));
+        resetManager.initializeWorldSpawn();
     }
 
     private void cleanupOrphanedPoolWorlds(MinecraftServer server) {
@@ -110,7 +117,7 @@ public class WorldManager implements WorldPoolHost {
             if (!key.identifier().getNamespace().equals(WorldReset.MOD_ID)) continue;
             if (keep.contains(key)) continue;
             WorldReset.LOGGER.info("Cleaning up orphaned pool world: {}", key.identifier());
-            ArcadeDimensions.delete(server, custom);
+            WorldDeletion.deleteDimensionAsync(server, custom);
         }
     }
 
@@ -273,7 +280,7 @@ public class WorldManager implements WorldPoolHost {
         int poolSize = ConfigManager.config().poolSize;
         if (poolSize > 0 && worldPool == null) {
             activeWorldSnapshot = WorldSnapshot.fromConfig(ConfigManager.config());
-            worldPool = new WorldPool(server, this, taskExecutor, worldPreloader, WorldReset.MOD_ID);
+            worldPool = new WorldPool(server, this, taskExecutor, poolPreloader, WorldReset.MOD_ID);
             WorldReset.LOGGER.info("World pool enabled (pool_size={})", poolSize);
         } else if (poolSize <= 0 && worldPool != null) {
             worldPool.cleanup();

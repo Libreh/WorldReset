@@ -8,7 +8,6 @@ import me.libreh.worldreset.mixin.world.MinecraftServerPollTaskAccessor;
 import me.libreh.worldreset.mixin.world.RaidsAccessor;
 import me.libreh.worldreset.mixin.world.ServerChunkCacheAccessor;
 import me.libreh.worldreset.util.SeedUtil;
-import net.casual.arcade.dimensions.ArcadeDimensions;
 import net.casual.arcade.dimensions.level.CustomLevel;
 import net.casual.arcade.dimensions.level.vanilla.VanillaDimension;
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevels;
@@ -101,7 +100,7 @@ public class ResetManager {
         try {
             worldManager.getWorldPreloader().reset();
             for (CustomLevel level : new CustomLevel[]{liveOverworld, liveNether, liveEnd}) {
-                if (level != null) ArcadeDimensions.delete(server, level);
+                if (level != null) WorldDeletion.deleteDimensionAsync(server, level);
             }
             while (((MinecraftServerPollTaskAccessor) server).worldreset$invokePollTask()) {}
         } finally {
@@ -128,7 +127,7 @@ public class ResetManager {
         try {
             worldManager.getWorldPreloader().reset();
             for (CustomLevel level : new CustomLevel[]{liveOverworld, liveNether, liveEnd}) {
-                if (level != null) ArcadeDimensions.delete(server, level);
+                if (level != null) WorldDeletion.deleteDimensionAsync(server, level);
             }
             while (((MinecraftServerPollTaskAccessor) server).worldreset$invokePollTask()) {}
             pool.registerPooledWorlds(pooled);
@@ -202,11 +201,13 @@ public class ResetManager {
         server.tickConnection();
     }
 
-    private void postReset(@Nullable BlockPos customSpawn) {
-        triggers.reset();
-        setTimeOfDay();
-        clearWeather();
+    // Fresh boot has no reset to correct the respawn data away from the vanilla overworld's own spawn point, so set it here.
+    public void initializeWorldSpawn() {
+        BlockPos customSpawn = SpawnSearch.findSpawn(worldManager.getGameOverworld(), ConfigManager.config().spawnNear, server);
+        setWorldSpawn(customSpawn);
+    }
 
+    private BlockPos setWorldSpawn(@Nullable BlockPos customSpawn) {
         var gameOverworld = worldManager.getGameOverworld();
         BlockPos respawnPos = customSpawn != null ? customSpawn : SpawnFinder.findSpawn(gameOverworld);
         server.setRespawnData(LevelData.RespawnData.of(gameOverworld.dimension(), respawnPos, 0.0F, 0.0F));
@@ -215,6 +216,16 @@ public class ResetManager {
         ServerChunkCache chunkSource = gameOverworld.getChunkSource();
         chunkSource.addTicketAndLoadWithRadius(TicketType.SPAWN_SEARCH, spawnChunk, 2);
         ((ServerChunkCacheAccessor) chunkSource).worldreset$invokeRunDistanceManagerUpdates();
+        return respawnPos;
+    }
+
+    private void postReset(@Nullable BlockPos customSpawn) {
+        triggers.reset();
+        setTimeOfDay();
+        clearWeather();
+
+        var gameOverworld = worldManager.getGameOverworld();
+        BlockPos respawnPos = setWorldSpawn(customSpawn);
 
         Set<UUID> processedPlayers = new HashSet<>();
         boolean spawnNearNone = ConfigManager.config().spawnNear.type.equals("none");
