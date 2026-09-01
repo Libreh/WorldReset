@@ -140,6 +140,13 @@ public class WorldManager implements WorldPoolHost {
         }
     }
 
+    public void onServerStopping() {
+        poolPreloader.reset();
+        if (worldPool != null) {
+            worldPool.cleanup();
+        }
+    }
+
     private void drainQueuedReset() {
         if (worldPool == null || !worldPool.isReady()) return;
         PendingReset request = pendingReset;
