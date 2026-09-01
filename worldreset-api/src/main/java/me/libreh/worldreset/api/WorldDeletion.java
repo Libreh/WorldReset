@@ -112,6 +112,7 @@ public class WorldDeletion {
         if (!accessor.getLevels().remove(dimension, level)) {
             return;
         }
+        level.onUnload();
         ServerLevelEvents.UNLOAD.invoker().onLevelUnload(server, level);
         try {
             level.close();

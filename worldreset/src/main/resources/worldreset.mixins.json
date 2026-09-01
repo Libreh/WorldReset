@@ -11,8 +11,7 @@
     "game.ServerPlayerDieMixin",
     "game.ServerPlayerEndCreditsMixin",
     "world.MinecraftServerHolderMixin",
-    "world.PlayerListMixin",
-    "world.RaidsAccessor"
+    "world.PlayerListMixin"
   ],
   "injectors": {
     "defaultRequire": 1
