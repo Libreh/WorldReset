@@ -8,7 +8,7 @@ import eu.pb4.predicate.api.MinecraftPredicate;
 import eu.pb4.predicate.api.PredicateContext;
 import eu.pb4.predicate.api.PredicateResult;
 import eu.pb4.predicate.api.PredicateRegistry;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -19,21 +19,21 @@ import java.util.Set;
 import java.util.UUID;
 
 public final class PortalEnterPredicate extends AbstractPredicate implements Trigger {
-    public static final Identifier ID = Identifier.parse("worldreset:portal_enter");
+    public static final ResourceLocation ID = ResourceLocation.parse("worldreset:portal_enter");
 
     public static final MapCodec<PortalEnterPredicate> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Identifier.CODEC.fieldOf("block").forGetter(PortalEnterPredicate::block),
+            ResourceLocation.CODEC.fieldOf("block").forGetter(PortalEnterPredicate::block),
             Codec.BOOL.optionalFieldOf("require_all_players", false).forGetter(PortalEnterPredicate::requireAllPlayers),
-            Identifier.CODEC.optionalFieldOf("origin_dimension").forGetter(PortalEnterPredicate::originDimension),
+            ResourceLocation.CODEC.optionalFieldOf("origin_dimension").forGetter(PortalEnterPredicate::originDimension),
             PredicateRegistry.CODEC.optionalFieldOf("filter").forGetter(PortalEnterPredicate::filter)
     ).apply(instance, PortalEnterPredicate::new));
 
-    private final Identifier block;
+    private final ResourceLocation block;
     private final boolean requireAllPlayers;
-    private final Optional<Identifier> originDimension;
+    private final Optional<ResourceLocation> originDimension;
     private final Optional<MinecraftPredicate> filter;
 
-    public PortalEnterPredicate(Identifier block, boolean requireAllPlayers, Optional<Identifier> originDimension, Optional<MinecraftPredicate> filter) {
+    public PortalEnterPredicate(ResourceLocation block, boolean requireAllPlayers, Optional<ResourceLocation> originDimension, Optional<MinecraftPredicate> filter) {
         super(ID, CODEC);
         this.block = block;
         this.requireAllPlayers = requireAllPlayers;
@@ -41,7 +41,7 @@ public final class PortalEnterPredicate extends AbstractPredicate implements Tri
         this.filter = filter;
     }
 
-    public Identifier block() {
+    public ResourceLocation block() {
         return block;
     }
 
@@ -49,7 +49,7 @@ public final class PortalEnterPredicate extends AbstractPredicate implements Tri
         return requireAllPlayers;
     }
 
-    public Optional<Identifier> originDimension() {
+    public Optional<ResourceLocation> originDimension() {
         return originDimension;
     }
 
@@ -58,7 +58,7 @@ public final class PortalEnterPredicate extends AbstractPredicate implements Tri
     }
 
     public boolean matchesDimension(ResourceKey<Level> actual) {
-        return originDimension.isEmpty() || originDimension.get().equals(actual.identifier());
+        return originDimension.isEmpty() || originDimension.get().equals(actual.location());
     }
 
     @Override
@@ -83,7 +83,7 @@ public final class PortalEnterPredicate extends AbstractPredicate implements Tri
         private final Set<UUID> entered = new HashSet<>();
 
         @Override
-        public boolean notePortal(ServerPlayer player, Identifier blockId, ResourceKey<Level> originDim) {
+        public boolean notePortal(ServerPlayer player, ResourceLocation blockId, ResourceKey<Level> originDim) {
             if (block.equals(blockId) && matchesDimension(originDim) && test(PredicateContext.of(player)).success()) {
                 return entered.add(player.getUUID());
             }

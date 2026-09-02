@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import me.libreh.worldreset.WorldReset;
 import me.libreh.worldreset.mixin.world.MinecraftServerAccessor;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
@@ -27,9 +27,9 @@ public final class ActiveWorldsState {
     public static void save(MinecraftServer server, ResourceKey<Level> overworld, ResourceKey<Level> nether, ResourceKey<Level> end) {
         try {
             JsonObject json = new JsonObject();
-            json.addProperty("overworld", overworld.identifier().toString());
-            json.addProperty("nether", nether.identifier().toString());
-            json.addProperty("end", end.identifier().toString());
+            json.addProperty("overworld", overworld.location().toString());
+            json.addProperty("nether", nether.location().toString());
+            json.addProperty("end", end.location().toString());
             Files.writeString(resolveFile(server), GSON.toJson(json));
         } catch (Exception e) {
             WorldReset.LOGGER.error("Failed to save active worlds state", e);
@@ -69,6 +69,6 @@ public final class ActiveWorldsState {
     private static @Nullable ResourceKey<Level> parseKey(JsonObject json, String field) {
         if (!json.has(field)) return null;
         String id = json.get(field).getAsString();
-        return ResourceKey.create(Registries.DIMENSION, Identifier.parse(id));
+        return ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(id));
     }
 }

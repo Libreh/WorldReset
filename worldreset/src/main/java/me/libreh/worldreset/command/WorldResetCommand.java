@@ -27,7 +27,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.IdentifierArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.commands.arguments.ResourceOrTagArgument;
 import net.minecraft.commands.arguments.ResourceOrTagKeyArgument;
@@ -35,7 +35,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 
@@ -138,20 +138,20 @@ public final class WorldResetCommand {
                                 .then(Commands.argument("require_all_players", BoolArgumentType.bool())
                                         .executes(ctx -> addPortalTrigger(ctx, listType, Optional.empty(),
                                                 BoolArgumentType.getBool(ctx, "require_all_players"))))
-                                .then(Commands.argument("origin_dimension", IdentifierArgument.id())
+                                .then(Commands.argument("origin_dimension", ResourceLocationArgument.id())
                                         .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(
-                                                ctx.getSource().getServer().levelKeys().stream().map(ResourceKey::identifier), builder))
+                                                ctx.getSource().getServer().levelKeys().stream().map(ResourceKey::location), builder))
                                         .executes(ctx -> addPortalTrigger(ctx, listType,
-                                                Optional.of(IdentifierArgument.getId(ctx, "origin_dimension")), false))
+                                                Optional.of(ResourceLocationArgument.getId(ctx, "origin_dimension")), false))
                                         .then(Commands.argument("require_all_players", BoolArgumentType.bool())
                                                 .executes(ctx -> addPortalTrigger(ctx, listType,
-                                                        Optional.of(IdentifierArgument.getId(ctx, "origin_dimension")),
+                                                        Optional.of(ResourceLocationArgument.getId(ctx, "origin_dimension")),
                                                         BoolArgumentType.getBool(ctx, "require_all_players")))))))
                 .then(Commands.literal("death")
                         .then(Commands.argument("entity", ResourceArgument.resource(buildContext, Registries.ENTITY_TYPE))
                                 .executes(ctx -> addDeathTrigger(ctx, listType))))
                 .then(Commands.literal("advancement")
-                        .then(Commands.argument("advancement", IdentifierArgument.id())
+                        .then(Commands.argument("advancement", ResourceLocationArgument.id())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(
                                         ctx.getSource().getServer().getAdvancements().getAllAdvancements()
                                                 .stream().map(AdvancementHolder::id), builder))
@@ -287,9 +287,9 @@ public final class WorldResetCommand {
         return 1;
     }
 
-    private static int addPortalTrigger(CommandContext<CommandSourceStack> ctx, TriggerList listType, Optional<Identifier> originDimension, boolean requireAll) throws CommandSyntaxException {
+    private static int addPortalTrigger(CommandContext<CommandSourceStack> ctx, TriggerList listType, Optional<ResourceLocation> originDimension, boolean requireAll) throws CommandSyntaxException {
         var holder = ResourceArgument.getResource(ctx, "block", Registries.BLOCK);
-        Identifier id = holder.key().identifier();
+        ResourceLocation id = holder.key().location();
         PortalEnterPredicate entry = new PortalEnterPredicate(id, requireAll, originDimension, Optional.empty());
         getTriggers(listType).add(entry);
         ConfigManager.save();
@@ -299,7 +299,7 @@ public final class WorldResetCommand {
 
     private static int addDeathTrigger(CommandContext<CommandSourceStack> ctx, TriggerList listType) throws CommandSyntaxException {
         var holder = ResourceArgument.getResource(ctx, "entity", Registries.ENTITY_TYPE);
-        Identifier id = holder.key().identifier();
+        ResourceLocation id = holder.key().location();
         EntityDeathPredicate entry = new EntityDeathPredicate(id, Optional.empty());
         getTriggers(listType).add(entry);
         ConfigManager.save();
@@ -308,7 +308,7 @@ public final class WorldResetCommand {
     }
 
     private static int addAdvancementTrigger(CommandContext<CommandSourceStack> ctx, TriggerList listType, boolean requireAll) {
-        Identifier id = IdentifierArgument.getId(ctx, "advancement");
+        ResourceLocation id = ResourceLocationArgument.getId(ctx, "advancement");
         AdvancementPredicate entry = new AdvancementPredicate(id, requireAll, Optional.empty());
         getTriggers(listType).add(entry);
         ConfigManager.save();

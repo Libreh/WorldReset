@@ -7,7 +7,6 @@ import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Set;
@@ -38,13 +37,12 @@ public class PlayerManager {
                 lobbyWorld,
                 1, 65, 1,
                 Set.of(),
-                0.0F, 0.0F,
-                true
+                0.0F, 0.0F
         );
     }
 
     public void teleportToOverworldSpawn(ServerPlayer player, ServerLevel overworld) {
-        BlockPos worldSpawnPos = overworld.getRespawnData().pos();
+        BlockPos worldSpawnPos = overworld.getSharedSpawnPos();
         Vec3 spawnPos = Vec3.atBottomCenterOf(player.adjustSpawnLocation(overworld, worldSpawnPos));
         player.teleportTo(
                 overworld,
@@ -52,17 +50,10 @@ public class PlayerManager {
                 spawnPos.y(),
                 spawnPos.z(),
                 Set.of(),
-                overworld.getRespawnData().pitch(),
-                overworld.getRespawnData().yaw(),
-                true
+                0.0F,
+                overworld.getSharedSpawnAngle()
         );
-        player.setRespawnPosition(
-                new ServerPlayer.RespawnConfig(
-                        LevelData.RespawnData.of(overworld.dimension(), worldSpawnPos, 0.0F, 0.0F),
-                        true
-                ),
-                false
-        );
+        player.setRespawnPosition(overworld.dimension(), worldSpawnPos, 0.0F, true, false);
     }
 
     // Dead players can't be teleported, so this forges the client's respawn-button packet to force
@@ -77,13 +68,7 @@ public class PlayerManager {
     }
 
     public ServerPlayer respawnInto(ServerPlayer player, ServerLevel level, BlockPos spawnPos) {
-        player.setRespawnPosition(
-                new ServerPlayer.RespawnConfig(
-                        LevelData.RespawnData.of(level.dimension(), spawnPos, 0.0F, 0.0F),
-                        true
-                ),
-                false
-        );
+        player.setRespawnPosition(level.dimension(), spawnPos, 0.0F, true, false);
         var connection = player.connection;
         connection.handleClientCommand(
                 new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.PERFORM_RESPAWN)

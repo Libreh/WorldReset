@@ -9,10 +9,10 @@ import me.libreh.worldreset.api.PlayerResetEvents;
 import me.libreh.worldreset.predicate.AdvancementPredicate;
 import me.libreh.worldreset.predicate.EntityDeathPredicate;
 import me.libreh.worldreset.predicate.PortalEnterPredicate;
-import net.minecraft.advancements.predicates.GameTypePredicate;
-import net.minecraft.advancements.predicates.entity.EntityPredicate;
-import net.minecraft.advancements.predicates.entity.PlayerPredicate;
-import net.minecraft.resources.Identifier;
+import net.minecraft.advancements.critereon.GameTypePredicate;
+import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.PlayerPredicate;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
@@ -50,13 +50,13 @@ public class Config {
     private static List<MinecraftPredicate> defaultStopTriggers() {
         List<MinecraftPredicate> list = new ArrayList<>();
         list.add(new PortalEnterPredicate(
-            Identifier.parse("minecraft:end_portal"),
+            ResourceLocation.parse("minecraft:end_portal"),
             false,
-            Optional.of(Identifier.parse("minecraft:the_end")),
+            Optional.of(ResourceLocation.parse("minecraft:the_end")),
             Optional.empty()
         ));
         list.add(new AdvancementPredicate(
-            Identifier.parse("minecraft:nether/uneasy_alliance"),
+            ResourceLocation.parse("minecraft:nether/uneasy_alliance"),
             false,
             Optional.empty()
         ));
@@ -66,10 +66,10 @@ public class Config {
     private static List<MinecraftPredicate> defaultResetTriggers() {
         List<MinecraftPredicate> list = new ArrayList<>();
         EntityPredicate filter = EntityPredicate.Builder.entity()
-            .player(PlayerPredicate.Builder.player().setGameType(GameTypePredicate.of(GameType.SURVIVAL)).build())
+            .subPredicate(PlayerPredicate.Builder.player().setGameType(GameTypePredicate.of(GameType.SURVIVAL)).build())
             .build();
         list.add(new EntityDeathPredicate(
-            Identifier.parse("minecraft:player"),
+            ResourceLocation.parse("minecraft:player"),
             Optional.of(BuiltinPredicates.vanillaEntityPredicate(filter))
         ));
         return list;

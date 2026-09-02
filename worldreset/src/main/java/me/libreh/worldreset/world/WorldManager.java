@@ -16,7 +16,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -114,9 +114,9 @@ public class WorldManager implements WorldPoolHost {
         for (ServerLevel level : levels) {
             if (!(level instanceof CustomLevel custom)) continue;
             ResourceKey<Level> key = level.dimension();
-            if (!key.identifier().getNamespace().equals(WorldReset.MOD_ID)) continue;
+            if (!key.location().getNamespace().equals(WorldReset.MOD_ID)) continue;
             if (keep.contains(key)) continue;
-            WorldReset.LOGGER.info("Cleaning up orphaned pool world: {}", key.identifier());
+            WorldReset.LOGGER.info("Cleaning up orphaned pool world: {}", key.location());
             WorldDeletion.deleteDimensionAsync(server, custom);
         }
     }
@@ -226,19 +226,19 @@ public class WorldManager implements WorldPoolHost {
         return triggers.shouldStop();
     }
 
-    public void onPortalUsed(ServerPlayer player, Identifier blockId, ServerLevel origin) {
+    public void onPortalUsed(ServerPlayer player, ResourceLocation blockId, ServerLevel origin) {
         if (triggers.notePortalUse(player, blockId, toVanillaDimension(origin))) {
             evaluateTriggers();
         }
     }
 
-    public void onEntityDeath(Identifier entityId, Entity entity) {
+    public void onEntityDeath(ResourceLocation entityId, Entity entity) {
         if (triggers.noteEntityDeath(entityId, entity)) {
             evaluateTriggers();
         }
     }
 
-    public void onAdvancement(ServerPlayer player, Identifier advancementId) {
+    public void onAdvancement(ServerPlayer player, ResourceLocation advancementId) {
         if (triggers.noteAdvancement(player, advancementId)) {
             evaluateTriggers();
         }

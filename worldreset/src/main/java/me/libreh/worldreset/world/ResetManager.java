@@ -14,9 +14,7 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
-import net.minecraft.world.clock.WorldClocks;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.storage.LevelData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
@@ -191,11 +189,11 @@ public class ResetManager {
     private void setWorldSpawn(@Nullable BlockPos customSpawn) {
         var gameOverworld = activeWorlds.overworld();
         BlockPos respawnPos = customSpawn != null ? customSpawn : SpawnFinder.findSpawn(gameOverworld);
-        server.setRespawnData(LevelData.RespawnData.of(gameOverworld.dimension(), respawnPos, 0.0F, 0.0F));
+        gameOverworld.setDefaultSpawnPos(respawnPos, 0.0F);
 
-        ChunkPos spawnChunk = ChunkPos.containing(respawnPos);
+        ChunkPos spawnChunk = new ChunkPos(respawnPos);
         ServerChunkCache chunkSource = gameOverworld.getChunkSource();
-        chunkSource.addTicketAndLoadWithRadius(TicketType.SPAWN_SEARCH, spawnChunk, 2);
+        chunkSource.addRegionTicket(TicketType.UNKNOWN, spawnChunk, 2, spawnChunk);
         ChunkLoading.runDistanceManagerUpdates(chunkSource);
     }
 
@@ -213,7 +211,7 @@ public class ResetManager {
             if (customSpawn != null && !spawnNearNone) {
                 player.teleportTo(gameOverworld,
                     customSpawn.getX() + 0.5, customSpawn.getY(), customSpawn.getZ() + 0.5,
-                    Set.of(), 0.0F, 0.0F, true);
+                    Set.of(), 0.0F, 0.0F);
             } else {
                 playerManager.teleportToOverworldSpawn(player, gameOverworld);
             }
@@ -226,15 +224,18 @@ public class ResetManager {
     private void setTimeOfDay(Config cfg) {
         int timeOfDay = cfg.resetOnLoad.timeOfDay;
         if (timeOfDay >= 0) {
-            var overworldClock = server.registryAccess().getOrThrow(WorldClocks.OVERWORLD);
-            server.clockManager().setTotalTicks(overworldClock, timeOfDay);
+            for (net.minecraft.server.level.ServerLevel level : server.getAllLevels()) {
+                level.setDayTime(timeOfDay);
+            }
             WorldReset.LOGGER.debug("Set time of day to {}", timeOfDay);
         }
     }
 
     private void clearWeather(Config cfg) {
         if (cfg.resetOnLoad.clearWeather) {
-            server.setWeatherParameters(0, 0, false, false);
+            for (net.minecraft.server.level.ServerLevel level : server.getAllLevels()) {
+                level.setWeatherParameters(0, 0, false, false);
+            }
             WorldReset.LOGGER.debug("Cleared weather");
         }
     }

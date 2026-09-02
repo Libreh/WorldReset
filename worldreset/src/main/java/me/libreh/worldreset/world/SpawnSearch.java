@@ -9,7 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -90,7 +90,7 @@ public final class SpawnSearch {
             var registry = overworld.registryAccess().lookupOrThrow(Registries.STRUCTURE);
             HolderSet<Structure> holderSet;
             if (spawnNear.target.startsWith("#")) {
-                TagKey<Structure> tagKey = TagKey.create(Registries.STRUCTURE, Identifier.parse(spawnNear.target.substring(1)));
+                TagKey<Structure> tagKey = TagKey.create(Registries.STRUCTURE, ResourceLocation.parse(spawnNear.target.substring(1)));
                 var tag = registry.get(tagKey);
                 if (tag.isEmpty()) {
                     WorldReset.LOGGER.warn("Unknown structure tag: {}", spawnNear.target);
@@ -98,7 +98,7 @@ public final class SpawnSearch {
                 }
                 holderSet = tag.get();
             } else {
-                var holder = registry.get(ResourceKey.create(Registries.STRUCTURE, Identifier.parse(spawnNear.target)));
+                var holder = registry.get(ResourceKey.create(Registries.STRUCTURE, ResourceLocation.parse(spawnNear.target)));
                 if (holder.isEmpty()) {
                     WorldReset.LOGGER.warn("Unknown structure: {}", spawnNear.target);
                     return null;
@@ -121,10 +121,10 @@ public final class SpawnSearch {
         } else if (spawnNear.type == SpawnType.BIOME) {
             Predicate<Holder<Biome>> predicate;
             if (spawnNear.target.startsWith("#")) {
-                TagKey<Biome> tagKey = TagKey.create(Registries.BIOME, Identifier.parse(spawnNear.target.substring(1)));
+                TagKey<Biome> tagKey = TagKey.create(Registries.BIOME, ResourceLocation.parse(spawnNear.target.substring(1)));
                 predicate = h -> h.is(tagKey);
             } else {
-                ResourceKey<Biome> biomeKey = ResourceKey.create(Registries.BIOME, Identifier.parse(spawnNear.target));
+                ResourceKey<Biome> biomeKey = ResourceKey.create(Registries.BIOME, ResourceLocation.parse(spawnNear.target));
                 predicate = h -> h.is(biomeKey);
             }
             Pair<BlockPos, Holder<Biome>> result = overworld.findClosestBiome3d(

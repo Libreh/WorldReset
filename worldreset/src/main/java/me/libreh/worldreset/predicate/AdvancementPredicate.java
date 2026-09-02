@@ -8,7 +8,7 @@ import eu.pb4.predicate.api.MinecraftPredicate;
 import eu.pb4.predicate.api.PredicateContext;
 import eu.pb4.predicate.api.PredicateResult;
 import eu.pb4.predicate.api.PredicateRegistry;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.HashSet;
@@ -17,26 +17,26 @@ import java.util.Set;
 import java.util.UUID;
 
 public final class AdvancementPredicate extends AbstractPredicate implements Trigger {
-    public static final Identifier ID = Identifier.parse("worldreset:advancement");
+    public static final ResourceLocation ID = ResourceLocation.parse("worldreset:advancement");
 
     public static final MapCodec<AdvancementPredicate> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Identifier.CODEC.fieldOf("advancement").forGetter(AdvancementPredicate::advancement),
+            ResourceLocation.CODEC.fieldOf("advancement").forGetter(AdvancementPredicate::advancement),
             Codec.BOOL.optionalFieldOf("require_all_players", false).forGetter(AdvancementPredicate::requireAllPlayers),
             PredicateRegistry.CODEC.optionalFieldOf("filter").forGetter(AdvancementPredicate::filter)
     ).apply(instance, AdvancementPredicate::new));
 
-    private final Identifier advancement;
+    private final ResourceLocation advancement;
     private final boolean requireAllPlayers;
     private final Optional<MinecraftPredicate> filter;
 
-    public AdvancementPredicate(Identifier advancement, boolean requireAllPlayers, Optional<MinecraftPredicate> filter) {
+    public AdvancementPredicate(ResourceLocation advancement, boolean requireAllPlayers, Optional<MinecraftPredicate> filter) {
         super(ID, CODEC);
         this.advancement = advancement;
         this.requireAllPlayers = requireAllPlayers;
         this.filter = filter;
     }
 
-    public Identifier advancement() {
+    public ResourceLocation advancement() {
         return advancement;
     }
 
@@ -67,7 +67,7 @@ public final class AdvancementPredicate extends AbstractPredicate implements Tri
         private final Set<UUID> awarded = new HashSet<>();
 
         @Override
-        public boolean noteAdvancement(ServerPlayer player, Identifier advancementId) {
+        public boolean noteAdvancement(ServerPlayer player, ResourceLocation advancementId) {
             if (advancement.equals(advancementId) && test(PredicateContext.of(player)).success()) {
                 return awarded.add(player.getUUID());
             }

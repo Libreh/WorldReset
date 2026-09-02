@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Portal;
-import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.level.portal.DimensionTransition;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -20,9 +20,9 @@ import org.spongepowered.asm.mixin.injection.At;
 public class EntityMixin {
     @WrapOperation(
         method = "handlePortal",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleport(Lnet/minecraft/world/level/portal/TeleportTransition;)Lnet/minecraft/world/entity/Entity;")
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;changeDimension(Lnet/minecraft/world/level/portal/DimensionTransition;)Lnet/minecraft/world/entity/Entity;")
     )
-    private Entity worldreset$notePortalUse(Entity instance, TeleportTransition transition, Operation<Entity> original) {
+    private Entity worldreset$notePortalUse(Entity instance, DimensionTransition transition, Operation<Entity> original) {
         ServerLevel origin = instance.level() instanceof ServerLevel level ? level : null;
         Portal portal = instance.portalProcess != null
             ? ((PortalProcessorAccessor) instance.portalProcess).worldreset$getPortal()

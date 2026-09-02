@@ -5,7 +5,7 @@ import me.libreh.worldreset.config.Config;
 import me.libreh.worldreset.config.ConfigManager;
 import me.libreh.worldreset.predicate.Trigger;
 import me.libreh.worldreset.predicate.TriggerState;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,15 +31,15 @@ public class TriggerTracker {
         states.clear();
     }
 
-    public boolean notePortalUse(ServerPlayer player, Identifier blockId, ResourceKey<Level> originDimension) {
+    public boolean notePortalUse(ServerPlayer player, ResourceLocation blockId, ResourceKey<Level> originDimension) {
         return note(state -> state.notePortal(player, blockId, originDimension));
     }
 
-    public boolean noteEntityDeath(Identifier entityId, Entity entity) {
+    public boolean noteEntityDeath(ResourceLocation entityId, Entity entity) {
         return note(state -> state.noteDeath(entityId, entity));
     }
 
-    public boolean noteAdvancement(ServerPlayer player, Identifier advancementId) {
+    public boolean noteAdvancement(ServerPlayer player, ResourceLocation advancementId) {
         return note(state -> state.noteAdvancement(player, advancementId));
     }
 

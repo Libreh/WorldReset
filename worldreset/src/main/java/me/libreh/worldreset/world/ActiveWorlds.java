@@ -2,7 +2,7 @@ package me.libreh.worldreset.world;
 
 import me.libreh.worldreset.config.ConfigManager;
 import net.casual.arcade.dimensions.level.CustomLevel;
-import net.casual.arcade.utils.level.LevelUtilsKt;
+import net.casual.arcade.dimensions.utils.DimensionUtilsKt;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 
@@ -34,9 +34,9 @@ public final class ActiveWorlds {
         this.nether = nether;
         this.end = end;
         if (ConfigManager.config().spoofDimension) {
-            LevelUtilsKt.setSpoofedDimension(overworld, Level.OVERWORLD);
-            LevelUtilsKt.setSpoofedDimension(nether, Level.NETHER);
-            LevelUtilsKt.setSpoofedDimension(end, Level.END);
+            DimensionUtilsKt.setSpoofedDimension(overworld, Level.OVERWORLD);
+            DimensionUtilsKt.setSpoofedDimension(nether, Level.NETHER);
+            DimensionUtilsKt.setSpoofedDimension(end, Level.END);
         }
         ActiveWorldsState.save(server, overworld.dimension(), nether.dimension(), end.dimension());
     }
