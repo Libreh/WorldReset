@@ -3,7 +3,6 @@ package me.libreh.worldreset.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import eu.pb4.predicate.api.GsonPredicateSerializer;
@@ -18,10 +17,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 
 public class ConfigManager {
-    public static final int VERSION = 9;
+    public static final int VERSION = 8;
     private static final Path CONFIG_DIR = FabricLoader.getInstance().getConfigDir();
     private static final Path CONFIG_PATH = CONFIG_DIR.resolve("worldreset.json");
     private static final Path OLD_CONFIG_PATH = CONFIG_DIR.resolve("worldless.json");
@@ -143,10 +141,6 @@ public class ConfigManager {
             json.add("reset_triggers", resetTriggers);
         }
 
-        if (configVersion < 9) {
-            migrateEntitySubPredicates(json);
-        }
-
         json.addProperty("config_version", VERSION);
     }
 
@@ -174,42 +168,14 @@ public class ConfigManager {
         JsonArray gamemodes = new JsonArray();
         gamemodes.add("survival");
         JsonObject playerSpecific = new JsonObject();
+        playerSpecific.addProperty("type", "player");
         playerSpecific.add("gamemode", gamemodes);
         JsonObject entityValue = new JsonObject();
-        entityValue.add("type_specific/player", playerSpecific);
+        entityValue.add("type_specific", playerSpecific);
         JsonObject filter = new JsonObject();
         filter.addProperty("type", "entity");
         filter.add("value", entityValue);
         return filter;
-    }
-
-    private static void migrateEntitySubPredicates(JsonElement element) {
-        if (element.isJsonArray()) {
-            for (JsonElement child : element.getAsJsonArray()) {
-                migrateEntitySubPredicates(child);
-            }
-            return;
-        }
-        if (!element.isJsonObject()) return;
-
-        JsonObject obj = element.getAsJsonObject();
-        for (String key : new ArrayList<>(obj.keySet())) {
-            migrateEntitySubPredicates(obj.get(key));
-        }
-
-        JsonElement typeSpecific = obj.get("type_specific");
-        if (typeSpecific != null && typeSpecific.isJsonObject()) {
-            obj.remove("type_specific");
-            JsonObject inner = typeSpecific.getAsJsonObject();
-            String type = inner.has("type") ? inner.get("type").getAsString() : "minecraft:player";
-            inner.remove("type");
-            obj.add("type_specific/" + legacySubPredicateName(type), inner);
-        }
-    }
-
-    private static String legacySubPredicateName(String type) {
-        String name = type.contains(":") ? type.substring(type.indexOf(':') + 1) : type;
-        return name.equals("slime") ? "cube_mob" : name;
     }
 
     public static void save() {
