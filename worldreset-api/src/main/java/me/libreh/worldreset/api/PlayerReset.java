@@ -77,7 +77,7 @@ public class PlayerReset {
 
     public static void resetAttributes(ServerPlayer player) {
         for (AttributeInstance attr : player.getAttributes().getAttributesToSync()) {
-            player.getAttributes().resetBaseValue(attr.getAttribute());
+            attr.setBaseValue(attr.getAttribute().value().getDefaultValue());
         }
     }
 
@@ -88,9 +88,9 @@ public class PlayerReset {
     private static <T> void resetStatsForType(ServerPlayer player, StatType<T> statType) {
         var registry = statType.getRegistry();
         for (ResourceLocation id : registry.keySet()) {
-            Optional<? extends Holder.Reference<T>> entry = registry.get(id);
-            if (entry.isPresent()) {
-                player.resetStat(statType.get(entry.get().value()));
+            T entry = registry.get(id);
+            if (entry != null) {
+                player.resetStat(statType.get(entry));
             }
         }
     }

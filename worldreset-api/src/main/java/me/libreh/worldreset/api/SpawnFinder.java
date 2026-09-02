@@ -14,17 +14,17 @@ public class SpawnFinder {
 
     @Nullable
     public static BlockPos findSpawnNear(ServerLevel world, BlockPos center) {
-        return spiralSearch(world, ChunkPos.containing(center));
+        return spiralSearch(world, new ChunkPos(center));
     }
 
     public static BlockPos findSpawn(ServerLevel world) {
         ServerChunkCache chunkSource = world.getChunkSource();
 
         BlockPos bestPos = chunkSource.randomState().sampler().findSpawnPosition();
-        ChunkPos startChunk = ChunkPos.containing(bestPos);
+        ChunkPos startChunk = new ChunkPos(bestPos);
 
         int spawnHeight = chunkSource.getGenerator().getSpawnHeight(world);
-        if (spawnHeight < world.getMinY()) {
+        if (spawnHeight < world.getMinBuildHeight()) {
             BlockPos worldPos = startChunk.getWorldPosition();
             spawnHeight = world.getHeight(Heightmap.Types.WORLD_SURFACE,
                     worldPos.getX() + 8, worldPos.getZ() + 8);
@@ -40,8 +40,8 @@ public class SpawnFinder {
         int dx = 0, dz = 0, ddx = 0, ddz = -1;
         for (int step = 0; step < MAX_STEPS; step++) {
             if (dx >= -5 && dx <= 5 && dz >= -5 && dz <= 5) {
-                ChunkPos candidate = new ChunkPos(startChunk.x() + dx, startChunk.z() + dz);
-                world.getChunk(candidate.x(), candidate.z());
+                ChunkPos candidate = new ChunkPos(startChunk.x + dx, startChunk.z + dz);
+                world.getChunk(candidate.x, candidate.z);
                 BlockPos pos = PlayerRespawnLogic.getSpawnPosInChunk(world, candidate);
                 if (pos != null) {
                     return pos;

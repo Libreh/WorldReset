@@ -16,6 +16,6 @@ public final class ChunkLoading {
     }
 
     public static @Nullable ChunkHolder getVisibleChunkNow(ChunkMap chunkMap, ChunkPos pos) {
-        return ((ChunkMapAccessor) chunkMap).worldreset$invokeGetVisibleChunkIfPresent(pos.pack());
+        return ((ChunkMapAccessor) chunkMap).worldreset$invokeGetVisibleChunkIfPresent(pos.toLong());
     }
 }

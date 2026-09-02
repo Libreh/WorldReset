@@ -3,7 +3,6 @@ package me.libreh.worldreset.api;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
@@ -17,8 +16,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class WorldPreloader {
-    public static TicketType ASYNC_CHUNK_TICKET;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldPreloader.class);
 
     // Caps how many chunk-generation tasks this preload keeps in flight on Util.backgroundExecutor
@@ -42,7 +39,7 @@ public class WorldPreloader {
     }
 
     public CompletableFuture<Void> startPreloading(ServerLevel overworld, float distance) {
-        return startPreloading(overworld, overworld.getRespawnData().pos(), distance);
+        return startPreloading(overworld, overworld.getSharedSpawnPos(), distance);
     }
 
     public CompletableFuture<Void> startPreloading(ServerLevel overworld, BlockPos center, float distance) {
@@ -50,7 +47,7 @@ public class WorldPreloader {
         preloadingComplete = false;
         int myGeneration = ++generation;
 
-        ChunkPos spawnChunk = ChunkPos.containing(center);
+        ChunkPos spawnChunk = new ChunkPos(center);
 
         List<ChunkPos> chunksToLoad = calculateChunksToLoad(spawnChunk, distance);
 
@@ -103,7 +100,7 @@ public class WorldPreloader {
 
         for (int x = -inner; x <= inner; x++) {
             for (int z = -inner; z <= inner; z++) {
-                chunks.add(new ChunkPos(center.x() + x, center.z() + z));
+                chunks.add(new ChunkPos(center.x + x, center.z + z));
             }
         }
 
@@ -114,7 +111,7 @@ public class WorldPreloader {
             for (int x = -outer; x <= outer; x++) {
                 for (int z = -outer; z <= outer; z++) {
                     if (Math.abs(x) > inner || Math.abs(z) > inner) {
-                        outerRing.add(new ChunkPos(center.x() + x, center.z() + z));
+                        outerRing.add(new ChunkPos(center.x + x, center.z + z));
                     }
                 }
             }
@@ -151,24 +148,8 @@ public class WorldPreloader {
         }
 
         var chunkManager = level.getChunkSource();
-        chunkManager.addTicketAndLoadWithRadius(ASYNC_CHUNK_TICKET, chunkPos, 0);
-
-        ChunkLoading.runDistanceManagerUpdates(chunkManager);
-
-        var loadingManager = chunkManager.chunkMap;
-        var chunkHolder = ChunkLoading.getVisibleChunkNow(loadingManager, chunkPos);
-
-        var chunkFuture = (chunkHolder != null
-            ? chunkHolder.scheduleChunkGenerationTask(ChunkStatus.FULL, loadingManager)
-            .thenApply(optional -> optional.orElse(null))
-            : CompletableFuture.completedFuture(null));
-
-        chunkFuture.whenCompleteAsync((chunk, error) ->
-                chunkManager.removeTicketWithRadius(ASYNC_CHUNK_TICKET, chunkPos, 0),
-            taskExecutor
-        );
-
-        return (CompletableFuture<ChunkAccess>) chunkFuture;
+        return chunkManager.getChunkFuture(chunkPos.x, chunkPos.z, ChunkStatus.FULL, true)
+            .thenApply(result -> (ChunkAccess) result.orElse(null));
     }
 
     public void reset() {

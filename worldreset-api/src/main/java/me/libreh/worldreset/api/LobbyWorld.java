@@ -117,7 +117,7 @@ public class LobbyWorld {
 
     private Path getLevelSaveDir(MinecraftServer server, ResourceLocation worldId) {
         for (ServerLevel world : server.getAllLevels()) {
-            if (world.dimension().identifier().equals(worldId)) {
+            if (world.dimension().location().equals(worldId)) {
                 return ((MinecraftServerAccessor) server).getStorageSource().getDimensionPath(world.dimension());
             }
         }

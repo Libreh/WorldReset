@@ -30,7 +30,7 @@ public class WorldDeletion {
 
         for (CustomLevel level : levels) {
             ((MinecraftServerAccessor) server).getLevels().remove(level.dimension());
-            ServerWorldEvents.UNLOAD.invoker().onLevelUnload(server, level);
+            ServerWorldEvents.UNLOAD.invoker().onWorldUnload(server, level);
         }
 
         for (CustomLevel level : levels) {
@@ -48,7 +48,7 @@ public class WorldDeletion {
                 try {
                     level.close();
                 } catch (Throwable t) {
-                    LOGGER.error("Failed to close level {}", level.dimension().identifier(), t);
+                    LOGGER.error("Failed to close level {}", level.dimension().location(), t);
                 }
             }
         } finally {
@@ -76,7 +76,7 @@ public class WorldDeletion {
             deleteQuietly(dimPath.resolve("data").resolve("minecraft"));
         }
 
-        Path mapsDir = storage.getLevelPath(LevelResource.DATA).resolve("minecraft").resolve("maps");
+        Path mapsDir = storage.getLevelPath(LevelResource.ROOT).resolve("data").resolve("minecraft").resolve("maps");
         if (Files.isDirectory(mapsDir)) {
             try (var entries = Files.list(mapsDir)) {
                 entries.forEach(WorldDeletion::deleteQuietly);
@@ -113,11 +113,11 @@ public class WorldDeletion {
             return;
         }
         level.onUnload();
-        ServerWorldEvents.UNLOAD.invoker().onLevelUnload(server, level);
+        ServerWorldEvents.UNLOAD.invoker().onWorldUnload(server, level);
         try {
             level.close();
         } catch (IOException e) {
-            LOGGER.error("Failed to close level {} before async delete", dimension.identifier(), e);
+            LOGGER.error("Failed to close level {} before async delete", dimension.location(), e);
         }
 
         Path toDelete = directory;
