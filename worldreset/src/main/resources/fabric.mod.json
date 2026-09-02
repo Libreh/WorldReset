@@ -15,13 +15,12 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-          "me.libreh.worldreset.WorldReset"
+			"me.libreh.worldreset.WorldReset"
 		]
 	},
 	"mixins": [
-      "worldreset.mixins.json"
+		"worldreset.mixins.json"
 	],
-	"accessWidener": "worldreset.accesswidener",
 	"depends": {
 		"fabricloader": ">=0.19.2",
 		"minecraft": "~26.2",

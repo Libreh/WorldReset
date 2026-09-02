@@ -14,16 +14,20 @@ subprojects {
         mavenLocal()
         maven { url 'https://maven.nucleoid.xyz' }
         maven { url 'https://maven.supersanta.me/snapshots' }
+        maven { url 'https://maven.parchmentmc.org/' }
     }
 
     dependencies {
         minecraft "com.mojang:minecraft:${project.minecraft_version}"
-        mappings loom.officialMojangMappings()
+        mappings loom.layered {
+            officialMojangMappings()
+            parchment('org.parchmentmc.data:parchment-1.21:2024.11.10@zip')
+        }
         compileOnly "net.fabricmc:sponge-mixin:0.15.4+mixin.0.8.7"
         compileOnly "net.fabricmc:fabric-loader:${project.loader_version}"
         localRuntime "net.fabricmc:fabric-loader:${project.loader_version}"
-        compileOnly "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-        localRuntime "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+        modCompileOnly "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+        modLocalRuntime "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     }
 
     processResources {

@@ -10,7 +10,7 @@ loom {
 }
 
 dependencies {
-    compileOnly("net.casualchampionships:arcade-dimensions:${project.arcade_version}")
-    localRuntime("net.casualchampionships:arcade-dimensions:${project.arcade_version}")
+    modCompileOnly("net.casualchampionships:arcade-dimensions:${project.arcade_version}")
+    modLocalRuntime("net.casualchampionships:arcade-dimensions:${project.arcade_version}")
     compileOnly("io.github.llamalad7:mixinextras-common:0.5.4")
 }

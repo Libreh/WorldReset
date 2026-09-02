@@ -1,7 +1,7 @@
 package me.libreh.worldreset.api;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.PlayerSpawnFinder;
+import net.minecraft.server.level.PlayerRespawnLogic;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -42,7 +42,7 @@ public class SpawnFinder {
             if (dx >= -5 && dx <= 5 && dz >= -5 && dz <= 5) {
                 ChunkPos candidate = new ChunkPos(startChunk.x() + dx, startChunk.z() + dz);
                 world.getChunk(candidate.x(), candidate.z());
-                BlockPos pos = PlayerSpawnFinder.getSpawnPosInChunk(world, candidate);
+                BlockPos pos = PlayerRespawnLogic.getSpawnPosInChunk(world, candidate);
                 if (pos != null) {
                     return pos;
                 }

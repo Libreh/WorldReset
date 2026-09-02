@@ -179,7 +179,7 @@ public class ResetManager {
     }
 
     private void tickKeepAlive() {
-        server.tickConnection();
+        server.getConnection().tick();
     }
 
     // Fresh boot has no reset to correct the respawn data away from the vanilla overworld's own spawn point, so set it here.

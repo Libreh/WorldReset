@@ -5,7 +5,6 @@ plugins {
 base.archivesName = "worldreset"
 
 loom {
-    accessWidenerPath = file("src/main/resources/worldreset.accesswidener")
     mods {
         "worldreset" {
             sourceSet sourceSets.main
@@ -19,25 +18,25 @@ dependencies {
 
     compileOnly "io.github.llamalad7:mixinextras-common:0.5.4"
 
-    compileOnly "me.lucko:fabric-permissions-api:${project.permissions_api_version}"
-    localRuntime "me.lucko:fabric-permissions-api:${project.permissions_api_version}"
+    modCompileOnly "me.lucko:fabric-permissions-api:${project.permissions_api_version}"
+    modLocalRuntime "me.lucko:fabric-permissions-api:${project.permissions_api_version}"
     include "me.lucko:fabric-permissions-api:${project.permissions_api_version}"
 
-    compileOnly "eu.pb4:predicate-api:${project.predicate_api_version}"
-    localRuntime "eu.pb4:predicate-api:${project.predicate_api_version}"
+    modCompileOnly "eu.pb4:predicate-api:${project.predicate_api_version}"
+    modLocalRuntime "eu.pb4:predicate-api:${project.predicate_api_version}"
     include "eu.pb4:predicate-api:${project.predicate_api_version}"
 
-    compileOnly "net.casualchampionships:arcade-dimensions:${project.arcade_version}"
-    compileOnly "net.casualchampionships:arcade-event-registry:${project.arcade_version}"
-    compileOnly "net.casualchampionships:arcade-events-server:${project.arcade_version}"
-    compileOnly "net.casualchampionships:arcade-extensions:${project.arcade_version}"
-    compileOnly "net.casualchampionships:arcade-utils:${project.arcade_version}"
+    modCompileOnly "net.casualchampionships:arcade-dimensions:${project.arcade_version}"
+    modCompileOnly "net.casualchampionships:arcade-event-registry:${project.arcade_version}"
+    modCompileOnly "net.casualchampionships:arcade-events-server:${project.arcade_version}"
+    modCompileOnly "net.casualchampionships:arcade-extensions:${project.arcade_version}"
+    modCompileOnly "net.casualchampionships:arcade-utils:${project.arcade_version}"
 
-    localRuntime "net.casualchampionships:arcade-dimensions:${project.arcade_version}"
-    localRuntime "net.casualchampionships:arcade-event-registry:${project.arcade_version}"
-    localRuntime "net.casualchampionships:arcade-events-server:${project.arcade_version}"
-    localRuntime "net.casualchampionships:arcade-extensions:${project.arcade_version}"
-    localRuntime "net.casualchampionships:arcade-utils:${project.arcade_version}"
+    modLocalRuntime "net.casualchampionships:arcade-dimensions:${project.arcade_version}"
+    modLocalRuntime "net.casualchampionships:arcade-event-registry:${project.arcade_version}"
+    modLocalRuntime "net.casualchampionships:arcade-events-server:${project.arcade_version}"
+    modLocalRuntime "net.casualchampionships:arcade-extensions:${project.arcade_version}"
+    modLocalRuntime "net.casualchampionships:arcade-utils:${project.arcade_version}"
 
     include "net.casualchampionships:arcade-dimensions:${project.arcade_version}"
     include "net.casualchampionships:arcade-event-registry:${project.arcade_version}"

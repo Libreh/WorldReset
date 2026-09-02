@@ -1,7 +1,7 @@
 package me.libreh.worldreset.api;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
@@ -23,6 +23,6 @@ public final class DimensionKeys {
 
     public static ResourceKey<Level> generate(String modId, String dimensionType) {
         return ResourceKey.create(Registries.DIMENSION,
-            Identifier.fromNamespaceAndPath(modId, dimensionType + "_" + randomSuffix()));
+            ResourceLocation.fromNamespaceAndPath(modId, dimensionType + "_" + randomSuffix()));
     }
 }

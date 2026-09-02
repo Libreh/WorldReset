@@ -2,7 +2,7 @@ package me.libreh.worldreset.api;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.StatType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -87,7 +87,7 @@ public class PlayerReset {
 
     private static <T> void resetStatsForType(ServerPlayer player, StatType<T> statType) {
         var registry = statType.getRegistry();
-        for (Identifier id : registry.keySet()) {
+        for (ResourceLocation id : registry.keySet()) {
             Optional<? extends Holder.Reference<T>> entry = registry.get(id);
             if (entry.isPresent()) {
                 player.resetStat(statType.get(entry.get().value()));

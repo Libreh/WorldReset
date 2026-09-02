@@ -1,7 +1,7 @@
 package me.libreh.worldreset.api;
 
 import me.libreh.worldreset.mixin.world.MinecraftServerAccessor;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import org.apache.commons.io.IOUtils;
@@ -23,7 +23,7 @@ public class LobbyWorld {
     private static final Logger LOGGER = LoggerFactory.getLogger(LobbyWorld.class);
     private static final String[] LOBBY_DIRECTORIES = {"entities/", "region/"};
 
-    public final Identifier id;
+    public final ResourceLocation id;
     private final String modId;
     private final String lobbyWorldResource;
     private final String lobbyPathPrefix;
@@ -31,7 +31,7 @@ public class LobbyWorld {
 
     public LobbyWorld(String modId) {
         this.modId = modId;
-        this.id = Identifier.fromNamespaceAndPath(modId, "lobby");
+        this.id = ResourceLocation.fromNamespaceAndPath(modId, "lobby");
         this.lobbyWorldResource = "/" + modId + "/lobby_world.zip";
         this.lobbyPathPrefix = "dimensions/" + modId + "/lobby/";
         this.datapackPrefix = "datapacks/" + modId + "/";
@@ -115,7 +115,7 @@ public class LobbyWorld {
         }
     }
 
-    private Path getLevelSaveDir(MinecraftServer server, Identifier worldId) {
+    private Path getLevelSaveDir(MinecraftServer server, ResourceLocation worldId) {
         for (ServerLevel world : server.getAllLevels()) {
             if (world.dimension().identifier().equals(worldId)) {
                 return ((MinecraftServerAccessor) server).getStorageSource().getDimensionPath(world.dimension());

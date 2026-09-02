@@ -4,7 +4,7 @@ import me.libreh.worldreset.mixin.world.ChunkMapAccessor;
 import me.libreh.worldreset.mixin.world.MinecraftServerAccessor;
 import me.libreh.worldreset.mixin.world.TrackedEntityAccessor;
 import net.casual.arcade.dimensions.level.CustomLevel;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
@@ -30,7 +30,7 @@ public class WorldDeletion {
 
         for (CustomLevel level : levels) {
             ((MinecraftServerAccessor) server).getLevels().remove(level.dimension());
-            ServerLevelEvents.UNLOAD.invoker().onLevelUnload(server, level);
+            ServerWorldEvents.UNLOAD.invoker().onLevelUnload(server, level);
         }
 
         for (CustomLevel level : levels) {
@@ -113,7 +113,7 @@ public class WorldDeletion {
             return;
         }
         level.onUnload();
-        ServerLevelEvents.UNLOAD.invoker().onLevelUnload(server, level);
+        ServerWorldEvents.UNLOAD.invoker().onLevelUnload(server, level);
         try {
             level.close();
         } catch (IOException e) {

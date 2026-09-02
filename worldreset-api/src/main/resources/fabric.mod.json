@@ -19,16 +19,12 @@
 		]
 	},
 	"mixins": [
-		"worldreset-api.mixins.json",
-		"c2me-compat.mixins.json"
+		"worldreset-api.mixins.json"
 	],
-	"suggests": {
-		"c2me": "*"
-	},
 	"depends": {
-		"fabricloader": ">=0.19.1",
-		"minecraft": "~26.2",
-		"java": ">=25",
+		"fabricloader": ">=0.16.0",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
 		"fabric-api": "*"
 	}
 }

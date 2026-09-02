@@ -1,6 +1,5 @@
 package me.libreh.worldreset.api;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import me.libreh.worldreset.mixin.world.EnderDragonFightAccessor;
 import me.libreh.worldreset.mixin.world.RaidsAccessor;
 import me.libreh.worldreset.mixin.world.WitherBossAccessor;
@@ -8,7 +7,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.raid.Raid;
-import net.minecraft.world.level.dimension.end.EnderDragonFight;
+import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Scoreboard;
 import org.slf4j.Logger;
@@ -31,14 +30,14 @@ public final class ResetCleanup {
     private static void clearBossEvents(ServerLevel... levels) {
         for (ServerLevel level : levels) {
             if (level == null) continue;
-            EnderDragonFight fight = level.getDragonFight();
+            EndDragonFight fight = level.getDragonFight();
             if (fight != null) ((EnderDragonFightAccessor) fight).worldreset$getDragonEvent().removeAllPlayers();
             for (var entity : level.getAllEntities()) {
                 if (entity instanceof WitherBoss wither) ((WitherBossAccessor) wither).worldreset$getBossEvent().removeAllPlayers();
             }
             // Raid.stop() releases the raid's boss event the same way, on top of marking it stopped.
             RaidsAccessor raidsAccessor = (RaidsAccessor) level.getRaids();
-            Int2ObjectMap<Raid> raids = raidsAccessor.getRaidMap();
+            java.util.Map<Integer, Raid> raids = raidsAccessor.getRaidMap();
             for (Raid raid : List.copyOf(raids.values())) {
                 raid.stop();
             }

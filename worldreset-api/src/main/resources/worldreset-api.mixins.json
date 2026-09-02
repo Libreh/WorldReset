@@ -1,14 +1,13 @@
 {
   "required": true,
   "package": "me.libreh.worldreset.mixin",
-  "compatibilityLevel": "JAVA_25",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
     "world.ChunkMapAccessor",
     "world.EnderDragonFightAccessor",
     "world.IOWorkerSkipCloseMixin",
     "world.MinecraftServerAccessor",
     "world.MinecraftServerPollTaskAccessor",
-    "world.MinecraftServerPrepareLevelsMixin",
     "world.MinecraftServerSaveMixin",
     "world.PersistentEntitySectionManagerSkipSaveMixin",
     "world.RaidsAccessor",
