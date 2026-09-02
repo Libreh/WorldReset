@@ -1,22 +1,25 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version "${loom_version}" apply false
+    id 'fabric-loom' version "${loom_version}" apply false
     id 'maven-publish'
 }
 
 subprojects {
-    apply plugin: 'net.fabricmc.fabric-loom'
+    apply plugin: 'fabric-loom'
     apply plugin: 'maven-publish'
 
     version = project.mod_version + "+" + project.minecraft_version
     group = project.maven_group
 
     repositories {
+        mavenLocal()
         maven { url 'https://maven.nucleoid.xyz' }
         maven { url 'https://maven.supersanta.me/snapshots' }
     }
 
     dependencies {
         minecraft "com.mojang:minecraft:${project.minecraft_version}"
+        mappings loom.officialMojangMappings()
+        compileOnly "net.fabricmc:sponge-mixin:0.15.4+mixin.0.8.7"
         compileOnly "net.fabricmc:fabric-loader:${project.loader_version}"
         localRuntime "net.fabricmc:fabric-loader:${project.loader_version}"
         compileOnly "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
@@ -32,13 +35,13 @@ subprojects {
     }
 
     tasks.withType(JavaCompile).configureEach {
-        it.options.release = 25
+        it.options.release = 21
     }
 
     java {
         withSourcesJar()
-        sourceCompatibility = JavaVersion.VERSION_25
-        targetCompatibility = JavaVersion.VERSION_25
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     jar {
