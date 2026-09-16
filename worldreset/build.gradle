@@ -15,7 +15,9 @@ loom {
 }
 
 dependencies {
-    api project(path: ":worldreset-api")
+    // namedElements = the dev (named-mappings) jar, so runServer doesn't pick up the
+    // remapped intermediary jar and drag intermediary class tweakers onto the dev classpath.
+    api project(path: ":worldreset-api", configuration: "namedElements")
     include project(path: ":worldreset-api")
 
     modImplementation include("me.lucko:fabric-permissions-api:${project.permissions_api_version}")
