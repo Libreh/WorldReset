@@ -13,14 +13,19 @@ loom {
 }
 
 dependencies {
-    api project(path: ":worldreset-api")
+    // namedElements = the dev (named-mappings) jar, so runServer doesn't pick up the
+    // remapped intermediary jar and try to apply its mixins against class_3898 etc.
+    api project(path: ":worldreset-api", configuration: "namedElements")
     include project(path: ":worldreset-api")
 
     compileOnly "io.github.llamalad7:mixinextras-common:0.5.4"
 
-    modCompileOnly "me.lucko:fabric-permissions-api:${project.permissions_api_version}"
-    modLocalRuntime "me.lucko:fabric-permissions-api:${project.permissions_api_version}"
-    include "me.lucko:fabric-permissions-api:${project.permissions_api_version}"
+    // 0.3.3 drags in fabric-api-bom 0.106.1+1.21.3, whose constraints bump fabric-api
+    // submodules (entity-events, content-registries, ...) to 1.21.3 builds that crash
+    // against 1.21.1. We already have the real 1.21.1 fabric-api on the classpath.
+    modCompileOnly("me.lucko:fabric-permissions-api:${project.permissions_api_version}") { exclude group: "net.fabricmc.fabric-api" }
+    modLocalRuntime("me.lucko:fabric-permissions-api:${project.permissions_api_version}") { exclude group: "net.fabricmc.fabric-api" }
+    include("me.lucko:fabric-permissions-api:${project.permissions_api_version}") { exclude group: "net.fabricmc.fabric-api" }
 
     modCompileOnly "eu.pb4:predicate-api:${project.predicate_api_version}"
     modLocalRuntime "eu.pb4:predicate-api:${project.predicate_api_version}"
