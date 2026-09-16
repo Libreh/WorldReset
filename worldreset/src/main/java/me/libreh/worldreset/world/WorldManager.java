@@ -41,6 +41,7 @@ public class WorldManager implements WorldPoolHost {
     private final ActiveWorlds activeWorlds;
     private final ResetManager resetManager;
     private boolean resetting;
+    private boolean triggersDirty;
 
     private final WorldPreloader poolPreloader;
     private @Nullable WorldPool worldPool;
@@ -126,6 +127,7 @@ public class WorldManager implements WorldPoolHost {
             worldPool.tick();
         }
         drainQueuedReset();
+        evaluateTriggers();
         if (!countdownManager.isCountdownActive()) return;
 
         countdownManager.tick();
@@ -199,6 +201,8 @@ public class WorldManager implements WorldPoolHost {
             WorldReset.LOGGER.error("Error during world reset", e);
         } finally {
             resetting = false;
+            // postReset() wiped the trigger states, so anything noted while the reset ran is stale.
+            triggersDirty = false;
         }
         return true;
     }
@@ -228,19 +232,19 @@ public class WorldManager implements WorldPoolHost {
 
     public void onPortalUsed(ServerPlayer player, Identifier blockId, ServerLevel origin) {
         if (triggers.notePortalUse(player, blockId, toVanillaDimension(origin))) {
-            evaluateTriggers();
+            triggersDirty = true;
         }
     }
 
     public void onEntityDeath(Identifier entityId, Entity entity) {
         if (triggers.noteEntityDeath(entityId, entity)) {
-            evaluateTriggers();
+            triggersDirty = true;
         }
     }
 
     public void onAdvancement(ServerPlayer player, Identifier advancementId) {
         if (triggers.noteAdvancement(player, advancementId)) {
-            evaluateTriggers();
+            triggersDirty = true;
         }
     }
 
@@ -251,10 +255,15 @@ public class WorldManager implements WorldPoolHost {
         playerResetState.markProcessed(player.getUUID());
     }
 
-    public void evaluateTriggers() {
+    // Triggers are noted from deep inside the level tick (LivingEntity#die, Entity#handlePortal,
+    // PlayerAdvancements#award), and resetting from there tears down the level that is still being
+    // iterated, which crashes the server. So notes only raise a flag and the reset happens here, at
+    // the start of the next server tick, where nothing is mid-iteration.
+    private void evaluateTriggers() {
         // tickKeepAlive() during a reset pumps player ticks, which can re-fire portal/death/advancement
         // events (e.g. the triggering player still standing in the portal); ignore them until the reset completes.
-        if (resetting) return;
+        if (!triggersDirty || resetting) return;
+        triggersDirty = false;
         if (triggers.shouldReset()) {
             resetWorlds("");
         } else if (countdownManager.isCountdownActive() && triggers.shouldStop()) {
