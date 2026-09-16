@@ -32,6 +32,13 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: build and publish arcade to mavenLocal
+        run: |
+          git clone --branch 1.21.1 --depth 1 https://github.com/Libreh/arcade.git ../arcade-dep
+          cd ../arcade-dep
+          chmod +x ./gradlew
+          ./gradlew publishToMavenLocal --console=plain
+
       - name: Build with Gradle
         run: ./gradlew build
         env:

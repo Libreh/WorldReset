@@ -30,6 +30,13 @@ jobs:
       - name: make gradle wrapper executable
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
+      - name: build and publish arcade to mavenLocal
+        shell: bash
+        run: |
+          git clone --branch 1.21.1 --depth 1 https://github.com/Libreh/arcade.git ../arcade-dep
+          cd ../arcade-dep
+          chmod +x ./gradlew
+          ./gradlew publishToMavenLocal --console=plain
       - name: build
         run: ./gradlew build
       - name: capture build artifacts
