@@ -19,9 +19,7 @@ public class SpawnFinder {
 
     public static BlockPos findSpawn(ServerLevel world) {
         ServerChunkCache chunkSource = world.getChunkSource();
-
-        BlockPos bestPos = chunkSource.randomState().sampler().findSpawnPosition();
-        ChunkPos startChunk = ChunkPos.containing(bestPos);
+        ChunkPos startChunk = chunkSource.getGenerator().getOrigin(chunkSource.randomState());
 
         int spawnHeight = chunkSource.getGenerator().getSpawnHeight(world);
         if (spawnHeight < world.getMinY()) {

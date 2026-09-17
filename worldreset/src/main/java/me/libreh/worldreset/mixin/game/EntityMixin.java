@@ -13,13 +13,14 @@ import net.minecraft.world.level.portal.TeleportTransition;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-// handlePortal is the one place where the portal block and the actual teleport meet, so portal
-// triggers are noted here atomically. The credits path never reaches this call (EndPortalBlock
-// shows the credits instead of teleporting); ServerPlayerEndCreditsMixin covers it.
+// teleportToPortalDestination is the one place where the portal block and the actual teleport meet,
+// so portal triggers are noted here atomically. The credits path never reaches this call
+// (EndPortalBlock shows the credits instead of teleporting); ServerPlayerEndCreditsMixin covers it.
+// The spectator right-click path also lands here with no portalProcess, and is skipped.
 @Mixin(Entity.class)
 public class EntityMixin {
     @WrapOperation(
-        method = "handlePortal",
+        method = "teleportToPortalDestination",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleport(Lnet/minecraft/world/level/portal/TeleportTransition;)Lnet/minecraft/world/entity/Entity;")
     )
     private Entity worldreset$notePortalUse(Entity instance, TeleportTransition transition, Operation<Entity> original) {
