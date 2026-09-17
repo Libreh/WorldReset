@@ -23,9 +23,9 @@ subprojects {
             officialMojangMappings()
             parchment('org.parchmentmc.data:parchment-1.21:2024.11.10@zip')
         }
-        compileOnly "net.fabricmc:sponge-mixin:0.15.4+mixin.0.8.7"
+        compileOnly "net.fabricmc:sponge-mixin:0.17.4+mixin.0.8.7"
         compileOnly "net.fabricmc:fabric-loader:${project.loader_version}"
-        localRuntime "net.fabricmc:fabric-loader:${project.loader_version}"
+        modLocalRuntime "net.fabricmc:fabric-loader:${project.loader_version}"
         modCompileOnly "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
         modLocalRuntime "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     }
